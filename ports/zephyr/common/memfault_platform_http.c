@@ -309,17 +309,12 @@ static int prv_read_socket_data(int sock_fd, void *buf, size_t *buf_len) {
 
 static bool prv_wait_for_http_response(int sock_fd) {
   sMemfaultHttpResponseContext ctx = { 0 };
-  char *buf = calloc(1, 1500);
-  if(!buf){
-    return false;
-  }
   while (1) {
     // We don't expect any response that needs to be parsed so
     // just use an arbitrarily small receive buffer
-    // char buf[32];
-    size_t bytes_read = 1500;//sizeof(buf);
+    char buf[32];
+    size_t bytes_read = sizeof(buf);
     if (!prv_read_socket_data(sock_fd, buf, &bytes_read)) {
-      free(buf);
       return false;
     }
 
@@ -328,7 +323,6 @@ static bool prv_wait_for_http_response(int sock_fd) {
       MEMFAULT_LOG_DEBUG("Response Complete: Parse Status %d HTTP Status %d!",
                          (int)ctx.parse_error, ctx.http_status_code);
       MEMFAULT_LOG_DEBUG("Body: %s", ctx.http_body);
-      free(buf);
       return true;
     }
   }
